@@ -24,11 +24,16 @@ export async function fetchHackerNews() {
 const SUBREDDITS = ['technology', 'artificial', 'MachineLearning', 'wallstreetbets', 'stocks']
 
 export async function fetchReddit() {
+  const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
   const results = []
   for (const sub of SUBREDDITS) {
     try {
-      const res = await fetch(`https://www.reddit.com/r/${sub}/hot.json?limit=10`, {
-        headers: { 'User-Agent': 'KanceDailyBriefing/1.0' }
+      // Use old.reddit.com — more lenient with datacenter IPs
+      const res = await fetch(`https://old.reddit.com/r/${sub}/hot.json?limit=10`, {
+        headers: {
+          'User-Agent': UA,
+          'Accept': 'application/json',
+        }
       })
       if (!res.ok) { console.warn(`Reddit /r/${sub}: ${res.status}`); continue }
       const data = await res.json()
@@ -42,8 +47,7 @@ export async function fetchReddit() {
           comments: c.data.num_comments,
         }))
       results.push(...posts)
-      // 200ms delay between subreddits to avoid rate limiting
-      await new Promise(r => setTimeout(r, 200))
+      await new Promise(r => setTimeout(r, 500))
     } catch (e) {
       console.warn(`Reddit /r/${sub} failed:`, e.message)
     }
