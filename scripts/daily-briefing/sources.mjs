@@ -21,36 +21,36 @@ export async function fetchHackerNews() {
     }))
 }
 
-const SUBREDDITS = ['technology', 'artificial', 'MachineLearning', 'wallstreetbets', 'stocks']
+// Lobste.rs — HN-like tech community, datacenter-friendly
+export async function fetchLobsters() {
+  try {
+    const res = await fetch('https://lobste.rs/hottest.json')
+    if (!res.ok) { console.warn(`Lobsters: ${res.status}`); return [] }
+    const data = await res.json()
+    return data.slice(0, 20).map(item => ({
+      title: item.title,
+      url: item.url || item.short_id_url,
+      score: item.score,
+      comments: item.comment_count,
+      tags: item.tags,
+      source: 'Lobsters',
+    }))
+  } catch (e) { console.warn('Lobsters failed:', e.message); return [] }
+}
 
-export async function fetchReddit() {
-  const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-  const results = []
-  for (const sub of SUBREDDITS) {
-    try {
-      // Use old.reddit.com — more lenient with datacenter IPs
-      const res = await fetch(`https://old.reddit.com/r/${sub}/hot.json?limit=10`, {
-        headers: {
-          'User-Agent': UA,
-          'Accept': 'application/json',
-        }
-      })
-      if (!res.ok) { console.warn(`Reddit /r/${sub}: ${res.status}`); continue }
-      const data = await res.json()
-      const posts = data.data.children
-        .filter(c => !c.data.stickied)
-        .map(c => ({
-          title: c.data.title,
-          url: c.data.url,
-          score: c.data.score,
-          subreddit: sub,
-          comments: c.data.num_comments,
-        }))
-      results.push(...posts)
-      await new Promise(r => setTimeout(r, 500))
-    } catch (e) {
-      console.warn(`Reddit /r/${sub} failed:`, e.message)
-    }
-  }
-  return results
+// Dev.to — developer articles, public API
+export async function fetchDevTo() {
+  try {
+    const res = await fetch('https://dev.to/api/articles?top=1&per_page=15')
+    if (!res.ok) { console.warn(`Dev.to: ${res.status}`); return [] }
+    const data = await res.json()
+    return data.map(item => ({
+      title: item.title,
+      url: item.url,
+      score: item.public_reactions_count,
+      comments: item.comments_count,
+      tags: item.tag_list,
+      source: 'Dev.to',
+    }))
+  } catch (e) { console.warn('Dev.to failed:', e.message); return [] }
 }

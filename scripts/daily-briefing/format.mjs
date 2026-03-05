@@ -14,6 +14,6 @@ ${line}
 ${aiContent}
 
 ${line}
-📡 HackerNews · Reddit
+📡 HackerNews · Lobsters · Dev.to
 🤖 Claude AI 编辑整理`
 }

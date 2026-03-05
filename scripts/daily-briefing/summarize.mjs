@@ -1,4 +1,4 @@
-export async function generateBriefing(hnData, redditData) {
+export async function generateBriefing(hnData, lobstersData, devtoData) {
   const dateStr = new Date().toLocaleDateString('zh-CN', {
     timeZone: 'Asia/Shanghai',
     year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
@@ -14,7 +14,7 @@ export async function generateBriefing(hnData, redditData) {
    💰 金融与华尔街
    🔥 硅谷热议
    🚀 值得关注的产品/项目
-2. 每条用一行中文概括要点，末尾标注来源如 [HN] [Reddit]
+2. 每条用一行中文概括要点，末尾标注来源如 [HN] [Lobsters] [Dev.to]
 3. 总字数300-500，语气：专业、犀利、有洞察力，像一个真正混圈子的极客朋友在跟你聊天
 4. 开头用一句话抓住今日核心
 5. 末尾加一句简短有力的早安寄语（不要鸡汤，要有极客范）
@@ -24,8 +24,11 @@ export async function generateBriefing(hnData, redditData) {
 === HackerNews Top Stories ===
 ${JSON.stringify(hnData.slice(0, 25), null, 2)}
 
-=== Reddit Highlights ===
-${JSON.stringify(redditData.slice(0, 40), null, 2)}`
+=== Lobste.rs Hot ===
+${JSON.stringify(lobstersData.slice(0, 15), null, 2)}
+
+=== Dev.to Trending ===
+${JSON.stringify(devtoData.slice(0, 10), null, 2)}`
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

@@ -1,10 +1,9 @@
-import { fetchHackerNews, fetchReddit } from './sources.mjs'
+import { fetchHackerNews, fetchLobsters, fetchDevTo } from './sources.mjs'
 import { generateBriefing } from './summarize.mjs'
 import { sendTelegram } from './telegram.mjs'
 import { wrapBriefing, getDateString } from './format.mjs'
 
 async function main() {
-  // Validate env
   for (const key of ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID', 'ANTHROPIC_API_KEY']) {
     if (!process.env[key]) {
       console.error(`Missing: ${key}`)
@@ -13,22 +12,24 @@ async function main() {
   }
 
   console.log('Fetching data...')
-  const [hnResult, redditResult] = await Promise.allSettled([
+  const [hnResult, lobstersResult, devtoResult] = await Promise.allSettled([
     fetchHackerNews(),
-    fetchReddit(),
+    fetchLobsters(),
+    fetchDevTo(),
   ])
 
   const hn = hnResult.status === 'fulfilled' ? hnResult.value : []
-  const reddit = redditResult.status === 'fulfilled' ? redditResult.value : []
-  console.log(`HN: ${hn.length} stories, Reddit: ${reddit.length} posts`)
+  const lobsters = lobstersResult.status === 'fulfilled' ? lobstersResult.value : []
+  const devto = devtoResult.status === 'fulfilled' ? devtoResult.value : []
+  console.log(`HN: ${hn.length}, Lobsters: ${lobsters.length}, Dev.to: ${devto.length}`)
 
-  if (hn.length === 0 && reddit.length === 0) {
+  if (hn.length === 0 && lobsters.length === 0 && devto.length === 0) {
     console.error('No data from any source')
     process.exit(1)
   }
 
   console.log('Generating briefing...')
-  const aiContent = await generateBriefing(hn, reddit)
+  const aiContent = await generateBriefing(hn, lobsters, devto)
 
   const fullMessage = wrapBriefing(aiContent, getDateString())
   console.log(`Message length: ${fullMessage.length} chars`)
