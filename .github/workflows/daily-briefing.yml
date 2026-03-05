@@ -1,0 +1,25 @@
+name: Daily Morning Briefing
+
+on:
+  schedule:
+    # 7:30 AM Beijing time (UTC+8) = 23:30 UTC
+    - cron: '30 23 * * *'
+  workflow_dispatch: # Manual trigger for testing
+
+jobs:
+  send-briefing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Send morning briefing
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/daily-briefing/index.mjs
